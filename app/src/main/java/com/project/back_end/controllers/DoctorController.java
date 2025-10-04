@@ -1,269 +1,119 @@
 package com.project.back_end.controllers;
 
+import com.project.back_end.DTO.Login;
 import com.project.back_end.models.Doctor;
-import com.project.back_end.models.dto.Login;
 import com.project.back_end.services.DoctorService;
-import com.project.back_end.services.TokenValidationService;
+import com.project.back_end.services.Service;
+//import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+import java.sql.Date;
 import java.time.LocalDate;
-import java.util.HashMap;
+//import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Doctor REST Controller
- * Base path: ${api.path}doctor
- * 
- * Endpoints (suggested contract to match your frontend):
- *   GET    /                             -> list all doctors
- *   GET    /availability/{user}/{doctorId}/{date}/{token}
- *   GET    /filter/{name}/{time}/{specialty}
- *   POST   /save/{token}                 -> admin creates doctor
- *   POST   /login                        -> doctor login
- *   PUT    /update/{token}               -> admin updates doctor
- *   DELETE /delete/{id}/{token}          -> admin deletes doctor
- *
- * Notes:
- * - TokenValidationService returns EMPTY map when token is valid (per your convention).
- * - `user` path variable for availability should be "patient" or "doctor".
- */
-@Validated
-@RestController
-@RequestMapping("${api.path}doctor")
+@RestController // 1. REST API Controller
+@RequestMapping("${api.path}doctor") // e.g., /api/doctor
 public class DoctorController {
 
     private final DoctorService doctorService;
-    private final TokenValidationService tokenValidationService;
+    private final Service service;
 
-    public DoctorController(DoctorService doctorService,
-                            TokenValidationService tokenValidationService) {
+    // 2. Constructor injection
+    //@Autowired
+    public DoctorController(DoctorService doctorService, Service service) {
         this.doctorService = doctorService;
-        this.tokenValidationService = tokenValidationService;
+        this.service = service;
     }
 
-    // ---------------------------------------------------------------------
-    // 3) Check a doctor's availability for a given date
-    // ---------------------------------------------------------------------
+    // 3. Get doctor availability
     @GetMapping("/availability/{user}/{doctorId}/{date}/{token}")
-    public ResponseEntity<Map<String, Object>> getDoctorAvailability(
-            @PathVariable("user") String user,
-            @PathVariable("doctorId") Long doctorId,
-            @PathVariable("date") String dateIso,         // yyyy-MM-dd
-            @PathVariable("token") String token) {
-
-        Map<String, Object> body = new HashMap<>();
-
-        // Validate token for user role ("patient" or "doctor")
-        Map<String, Object> validation = tokenValidationService.validateToken(token, user);
-        if (validation != null && !validation.isEmpty()) {
-            body.put("success", false);
-            body.put("message", validation.getOrDefault("error", "Invalid token"));
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+    public ResponseEntity<?> getDoctorAvailability(
+            @PathVariable String user,
+            @PathVariable Long doctorId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @PathVariable String token
+    ) {
+        if (!service.validateToken(token, user)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid or expired token.");
         }
 
-        try {
-            LocalDate date = LocalDate.parse(dateIso);
-            // You can shape the result to your needs: boolean, time slots, etc.
-            Object availability = doctorService.getAvailabilityForDate(doctorId, date);
-
-            body.put("success", true);
-            body.put("availability", availability);
-            return ResponseEntity.ok(body);
-        } catch (Exception e) {
-            body.put("success", false);
-            body.put("message", "Failed to fetch availability");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
-        }
+        List<?> availableSlots = doctorService.getDoctorAvailability(doctorId, Date.valueOf(date));
+        return ResponseEntity.ok(Map.of("availableSlots", availableSlots));
     }
 
-    // ---------------------------------------------------------------------
-    // 4) Get all doctors
-    // ---------------------------------------------------------------------
-    @GetMapping
-    public ResponseEntity<Map<String, Object>> getDoctor() {
-        Map<String, Object> body = new HashMap<>();
-        try {
-            List<Doctor> doctors = doctorService.getAllDoctors();
-            body.put("doctors", doctors);
-            body.put("success", true);
-            return ResponseEntity.ok(body);
-        } catch (Exception e) {
-            body.put("success", false);
-            body.put("message", "Failed to load doctors");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
-        }
+    // 4. Get all doctors
+    @GetMapping("/all")
+    public ResponseEntity<?> getDoctor() {
+        List<Doctor> doctors = doctorService.getDoctors();
+        return ResponseEntity.ok(Map.of("doctors", doctors));
     }
 
-    // ---------------------------------------------------------------------
-    // 5) Save (register) a new doctor (ADMIN)
-    // Frontend hits: POST /doctor/save/{token}
-    // ---------------------------------------------------------------------
-    @PostMapping("/save/{token}")
-    public ResponseEntity<Map<String, Object>> saveDoctor(
-            @PathVariable("token") String token,
-            @Valid @RequestBody Doctor doctor) {
-
-        Map<String, Object> body = new HashMap<>();
-
-        // Validate admin token
-        Map<String, Object> validation = tokenValidationService.validateToken(token, "admin");
-        if (validation != null && !validation.isEmpty()) {
-            body.put("success", false);
-            body.put("message", validation.getOrDefault("error", "Invalid token"));
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+    // 5. Save a new doctor (admin-only)
+    @PostMapping("/register/{token}")
+    public ResponseEntity<?> saveDoctor(@RequestBody Doctor doctor, @PathVariable String token) {
+        if (!service.validateToken(token, "admin")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access.");
         }
 
-        try {
-            if (doctorService.existsByEmail(doctor.getEmail())) {
-                body.put("success", false);
-                body.put("message", "Doctor already exists");
-                return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
-            }
-
-            Doctor saved = doctorService.saveDoctor(doctor);
-            body.put("success", true);
-            body.put("message", "Doctor saved successfully");
-            body.put("doctor", saved);
-            return ResponseEntity.status(HttpStatus.CREATED).body(body);
-
-        } catch (Exception e) {
-            body.put("success", false);
-            body.put("message", "Failed to save doctor");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
-        }
+        int result = doctorService.saveDoctor(doctor);
+        return switch (result) {
+            case -1 -> ResponseEntity.status(HttpStatus.CONFLICT).body("Doctor with email already exists.");
+            case 1 -> ResponseEntity.status(HttpStatus.CREATED).body("Doctor registered successfully.");
+            default -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while registering doctor.");
+        };
     }
 
-    // ---------------------------------------------------------------------
-    // 6) Doctor login
-    // Frontend hits: POST /doctor/login
-    // Returns: { success, token, message }
-    // ---------------------------------------------------------------------
+    // 6. Doctor login
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> doctorLogin(@Valid @RequestBody Login loginDto) {
-        Map<String, Object> body = new HashMap<>();
-        try {
-            Map<String, Object> result = doctorService.login(loginDto);
-            boolean success = Boolean.TRUE.equals(result.get("success"));
-            return ResponseEntity.status(success ? HttpStatus.OK : HttpStatus.UNAUTHORIZED).body(result);
-        } catch (Exception e) {
-            body.put("success", false);
-            body.put("message", "Login failed");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
-        }
+    public ResponseEntity<?> doctorLogin(@RequestBody Login login) {
+        return ResponseEntity.ok(doctorService.validateDoctor(login.getEmail(), login.getPassword()));
     }
 
-    // ---------------------------------------------------------------------
-    // 7) Update existing doctor (ADMIN)
-    // Frontend hits: PUT /doctor/update/{token}
-    // ---------------------------------------------------------------------
-    @PutMapping("/update/{token}")
-    public ResponseEntity<Map<String, Object>> updateDoctor(
-            @PathVariable("token") String token,
-            @Valid @RequestBody Doctor doctor) {
-
-        Map<String, Object> body = new HashMap<>();
-
-        // Validate admin token
-        Map<String, Object> validation = tokenValidationService.validateToken(token, "admin");
-        if (validation != null && !validation.isEmpty()) {
-            body.put("success", false);
-            body.put("message", validation.getOrDefault("error", "Invalid token"));
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+    // 7. Update doctor (admin-only)
+    @PutMapping("/update/{token}/{doctorId}")
+    public ResponseEntity<?> updateDoctor(@RequestBody Doctor updatedDoctor,
+                                          @PathVariable String token,
+                                          @PathVariable Long doctorId) {
+        if (!service.validateToken(token, "admin")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access.");
         }
 
-        try {
-            if (!doctorService.existsById(doctor.getId())) {
-                body.put("success", false);
-                body.put("message", "Doctor not found");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
-            }
-
-            Doctor updated = doctorService.updateDoctor(doctor);
-            body.put("success", true);
-            body.put("message", "Doctor updated successfully");
-            body.put("doctor", updated);
-            return ResponseEntity.ok(body);
-
-        } catch (Exception e) {
-            body.put("success", false);
-            body.put("message", "Failed to update doctor");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
-        }
+        int result = doctorService.updateDoctor(doctorId, updatedDoctor);
+        return switch (result) {
+            case -1 -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Doctor not found.");
+            case 1 -> ResponseEntity.ok("Doctor updated successfully.");
+            default -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while updating doctor.");
+        };
     }
 
-    // ---------------------------------------------------------------------
-    // 8) Delete doctor by ID (ADMIN)
-    // Frontend hits: DELETE /doctor/delete/{id}/{token}
-    // Matches your JS: deleteDoctor(id, token)
-    // ---------------------------------------------------------------------
-    @DeleteMapping("/delete/{id}/{token}")
-    public ResponseEntity<Map<String, Object>> deleteDoctor(
-            @PathVariable("id") Long id,
-            @PathVariable("token") String token) {
-
-        Map<String, Object> body = new HashMap<>();
-
-        // Validate admin token
-        Map<String, Object> validation = tokenValidationService.validateToken(token, "admin");
-        if (validation != null && !validation.isEmpty()) {
-            body.put("success", false);
-            body.put("message", validation.getOrDefault("error", "Invalid token"));
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+    // 8. Delete doctor (admin-only)
+    @DeleteMapping("/delete/{token}/{doctorId}")
+    public ResponseEntity<?> deleteDoctor(@PathVariable String token, @PathVariable Long doctorId) {
+        if (!service.validateToken(token, "admin")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access.");
         }
 
-        try {
-            if (!doctorService.existsById(id)) {
-                body.put("success", false);
-                body.put("message", "Doctor not found");
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
-            }
-
-            doctorService.deleteById(id);
-            body.put("success", true);
-            body.put("message", "Doctor deleted successfully");
-            return ResponseEntity.ok(body);
-
-        } catch (Exception e) {
-            body.put("success", false);
-            body.put("message", "Failed to delete doctor");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
-        }
+        int result = doctorService.deleteDoctor(doctorId);
+        return switch (result) {
+            case -1 -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Doctor not found.");
+            case 1 -> ResponseEntity.ok("Doctor and associated appointments deleted successfully.");
+            default -> ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error while deleting doctor.");
+        };
     }
 
-    // ---------------------------------------------------------------------
-    // 9) Filter doctors by name, time, and specialty
-    // Frontend hits: GET /doctor/filter/{name}/{time}/{specialty}
-    // Matches your JS: filterDoctors(name, time, specialty)
-    // Use "null" placeholders for empty filters as your frontend does.
-    // ---------------------------------------------------------------------
-    @GetMapping("/filter/{name}/{time}/{specialty}")
-    public ResponseEntity<Map<String, Object>> filter(
-            @PathVariable("name") String name,
-            @PathVariable("time") String time,
-            @PathVariable("specialty") String specialty) {
-
-        Map<String, Object> body = new HashMap<>();
-        try {
-            String n = "null".equalsIgnoreCase(name) ? null : name;
-            String t = "null".equalsIgnoreCase(time) ? null : time;
-            String s = "null".equalsIgnoreCase(specialty) ? null : specialty;
-
-            List<Doctor> doctors = doctorService.filter(n, t, s);
-
-            body.put("success", true);
-            body.put("doctors", doctors);
-            return ResponseEntity.ok(body);
-
-        } catch (Exception e) {
-            body.put("success", false);
-            body.put("message", "Failed to filter doctors");
-            body.put("doctors", List.of());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
-        }
+    // 9. Filter doctors (by name, time, specialty)
+    @GetMapping("/filter")
+    public ResponseEntity<?> filterDoctor(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String time,
+            @RequestParam(required = false) String speciality
+    ) {
+        List<Doctor> doctors = service.filterDoctor(name, speciality, time);
+        return ResponseEntity.ok(Map.of("doctors", doctors));
     }
 }

@@ -1,63 +1,93 @@
-<!-- patientDashboard.html -->
+<!-- app/src/main/resources/static/pages/patientDashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="../assets/images/logo/logo.png" />
-    <title>PatientDashboard</title>
-    <link rel="stylesheet" href="../assets/css/adminDashboard.css">
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="stylesheet" href="../assets/css/patientDashboard.css">
-    <script src="../js/render.js" defer></script>
-    <script src="../js/util.js" defer></script>
-    <script src="../js/components/header.js" defer></script>
-    <script src="../js/components/footer.js" defer></script>
-    <script type="module" src="../js/components/modals.js"></script>
+  <meta charset="UTF-8" />
+  <title>PatientDashboard</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="../assets/images/logo/logo.png" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../assets/css/adminDashboard.css" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/patientDashboard.css" />
+
+  <!-- Utilities & components -->
+  <script src="../js/render.js" defer></script>
+  <script src="../js/util.js" defer></script>
+  <script src="../js/components/header.js" defer></script>
+  <script src="../js/components/footer.js" defer></script>
+  <script type="module" src="../js/components/modals.js"></script>
 </head>
-
 <body onload="renderContent()">
-    <div class="container">
-        <div class="wrapper">
-            <div id="header"></div>
-            <main class="main-content">
-                <input type="text" id="searchBar" class="searchBar" placeholder="Search Bar for custom output" />
-                <div class="filter-wrapper">
-                    <select class="filter-select" id="filterTime">
-                        <option value="">Sort by Time</option>
-                        <option value="AM">AM</option>
-                        <option value="PM">PM</option>
-                    </select>
-                    <select class="filter-select" id="filterSpecialty">
-                        <option value="">Filter by Specialty</option>
-                        <option value="Cardiologist">Cardiologist</option>
-                        <option value="Dermatologist">Dermatologist</option>
-                        <option value="Neurologist">Neurologist</option>
-                        <option value="Pediatrician">Pediatrician</option>
-                        <option value="Orthopedic">Orthopedic</option>
-                        <option value="Gynecologist">Gynecologist</option>
-                        <option value="Psychiatrist">Psychiatrist</option>
-                        <option value="Dentist">Dentist</option>
-                        <option value="Ophthalmologist">Ophthalmologist</option>
-                        <option value="Ent">ENT Specialist</option>
-                        <option value="Urologist">Urologist</option>
-                        <option value="Oncologist">Oncologist</option>
-                        <option value="Gastroenterologist">Gastroenterologist</option>
-                        <option value="General">General Physician</option>
-                    </select>
-                </div>
-                <div id="content"></div>
-            </main>
-            <div id="footer"></div>
-        </div>
-    </div>
-    <div id="modal" class="modal">
-        <div class="modal-content">
-            <span class="close" id="closeModal">&times;</span>
-            <div id="modal-body"></div>
-        </div>
-    </div>
-    <script type="module" src="../js/patientDashboard.js" defer></script>
-</body>
+  <noscript>Please enable JavaScript to use this page.</noscript>
 
+  <div class="container">
+    <div class="wrapper">
+      <!-- Dynamic header -->
+      <div id="header"></div>
+
+      <!-- Main content -->
+      <main class="main-content" aria-labelledby="page-title">
+        <h2 id="page-title" class="sr-only">Patient Dashboard</h2>
+
+        <!-- Search -->
+        <input
+          type="text"
+          id="searchBar"
+          class="searchBar"
+          placeholder="Search doctors by name, email, or phone"
+          aria-label="Search doctors"
+        />
+
+        <!-- Filters -->
+        <div class="filter-wrapper" aria-label="Filters">
+          <label for="filterTime" class="sr-only">Sort by Time</label>
+          <select class="filter-select" id="filterTime" aria-label="Sort by time">
+            <option value="">Sort by Time</option>
+            <option value="AM">AM</option>
+            <option value="PM">PM</option>
+          </select>
+
+          <label for="filterSpecialty" class="sr-only">Filter by Specialty</label>
+          <select class="filter-select" id="filterSpecialty" aria-label="Filter by specialty">
+            <option value="">Filter by Specialty</option>
+            <option value="Cardiologist">Cardiologist</option>
+            <option value="Dermatologist">Dermatologist</option>
+            <option value="Neurologist">Neurologist</option>
+            <option value="Pediatrician">Pediatrician</option>
+            <option value="Orthopedic">Orthopedic</option>
+            <option value="Gynecologist">Gynecologist</option>
+            <option value="Psychiatrist">Psychiatrist</option>
+            <option value="Dentist">Dentist</option>
+            <option value="Ophthalmologist">Ophthalmologist</option>
+            <option value="Ent">ENT Specialist</option>
+            <option value="Urologist">Urologist</option>
+            <option value="Oncologist">Oncologist</option>
+            <option value="Gastroenterologist">Gastroenterologist</option>
+            <option value="General">General Physician</option>
+          </select>
+        </div>
+
+        <!-- Dynamic cards go here -->
+        <div id="content" aria-live="polite"></div>
+      </main>
+
+      <!-- Dynamic footer -->
+      <div id="footer"></div>
+    </div>
+  </div>
+
+  <!-- Reusable modal -->
+  <div id="modal" class="modal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="modal-content" role="document">
+      <button class="close" id="closeModal" aria-label="Close modal">&times;</button>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- Page logic -->
+  <script type="module" src="../js/patientDashboard.js" defer></script>
+</body>
 </html>

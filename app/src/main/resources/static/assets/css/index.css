@@ -1,53 +1,270 @@
-/* this is the style sheet file for index.htlm  */
+/* app/src/main/resources/static/assets/css/index.css */
+/* ================================================================
+   Global Styles for index.html
+   This stylesheet defines layout, typography, buttons, modal,
+   and header/footer styling for the Role Selection page.
+================================================================ */
 
-/* 
-**Global Reset (`*`)**
+/* ===============================
+   GLOBAL RESET AND BASE SETTINGS
+================================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-* Remove all default margin and padding.
-* Use `border-box` for sizing to include padding and border in element size.
+html,
+body {
+  height: 100%;
+  font-family: "Roboto", sans-serif;
+  background-color: #f9f9f9;
+  color: #222;
+}
 
-**Base (`html, body`)**
+/* ===============================
+   WRAPPER AND LAYOUT
+================================= */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
 
-* Set height to 100% for full viewport layout.
-* Use the `'Roboto'` sans-serif font for modern, clean typography.
+/* ===============================
+   MAIN CONTENT AREA
+================================= */
+.main-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  text-align: center;
+  background: url("../images/backgrounds/bg-main.jpg") center/cover no-repeat fixed;
+}
 
-**Layout Wrapper (`.wrapper`)**
+/* ===============================
+   HEADINGS
+================================= */
+h2 {
+  font-size: 48px;
+  margin-bottom: 50px;
+  color: #003e3e;
+  font-weight: 700;
+  font-family: "Alegreya", "Roboto", sans-serif;
+}
 
-* Use a vertical flexbox layout.
-* Ensure the wrapper covers at least the full height of the screen (`min-height: 100vh`).
+/* ===============================
+   BUTTONS (GLOBAL STYLE)
+================================= */
+button {
+  background-color: #015c5d;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  width: 200px;
+  margin-top: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
 
-**Heading (`h2`)**
+button:hover {
+  background-color: #a62b1f;
+}
 
-* Set a large font size (`48px`) for prominence.
-* Add a bottom margin of `50px` for spacing.
-* Use a dark teal color (`#003e3e`).
-* Make the font bold and use a blended font stack (`'Alegreya', 'Roboto', sans-serif`) for elegant styling.
+/* Dashboard-specific button */
+.dashboard-btn {
+  background-color: #015c5d;
+}
 
-**Main Section (`.main-content`)**
+.dashboard-btn:hover {
+  background-color: #003e3e;
+}
 
-* Allow the section to grow to fill space with `flex-grow: 1`.
-* Add `40px` of internal padding.
-* Center content both horizontally and vertically using `justify-content` and `align-items`.
-* Display items in a column direction.
-* Center all text.
-* Apply a full-screen background image with:
+/* ===============================
+   HEADER AND FOOTER
+================================= */
+.header,
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #003e3e;
+  color: white;
+  padding: 15px 30px;
+}
 
-  * `cover` size
-  * `center` positioning
-  * no repeat
-  * `fixed` attachment to keep image still during scroll
+.header img.logo {
+  height: 50px;
+}
 
-**Buttons (`button`)**
+.header nav a,
+.footer a {
+  color: white;
+  text-decoration: none;
+  margin: 0 10px;
+  font-weight: 500;
+}
 
-* Style with a teal green background (`#015c5d`) and white text.
-* Remove borders and round the corners (`12px`).
-* Use `10px 20px` padding and set width to `200px`.
-* Add a top margin of `10px` for spacing.
-* Enable pointer cursor and readable font size (`16px`).
-* On hover, change background color to bold red (`#A62B1F`).
+.header nav a:hover,
+.footer a:hover {
+  text-decoration: underline;
+}
 
-**Dashboard Buttons (`.dashboard-btn`)**
+.footer {
+  flex-wrap: wrap;
+  justify-content: center;
+  font-size: 14px;
+  text-align: center;
+}
 
-* Use the same base green background (`#015c5d`) as the default button.
-* On hover, darken the background to deep teal (`#003e3e`) for visual feedback.
- */
+/* ===============================
+   MODAL STYLES
+================================= */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 999;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  background-color: #fff;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90%;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.3s ease;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  color: #015c5d;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #a62b1f;
+  cursor: pointer;
+}
+
+.modal-close:hover {
+  color: #015c5d;
+}
+
+.modal-body {
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+}
+
+/* ===============================
+   INPUTS, FORMS, AND INTERACTIVES
+================================= */
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin: 8px 0;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #015c5d;
+  outline: none;
+}
+
+.select-dropdown {
+  background-color: #fff;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkbox-group label {
+  font-size: 14px;
+}
+
+/* ===============================
+   UTILITIES
+================================= */
+.text-center {
+  text-align: center;
+}
+
+.btn-group {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+}
+
+/* ===============================
+   ANIMATIONS
+================================= */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===============================
+   RESPONSIVE ADJUSTMENTS
+================================= */
+@media (max-width: 768px) {
+  h2 {
+    font-size: 36px;
+  }
+
+  button {
+    width: 150px;
+    font-size: 14px;
+  }
+
+  .modal-content {
+    width: 90%;
+  }
+
+  .header,
+  .footer {
+    flex-direction: column;
+    text-align: center;
+  }
+}

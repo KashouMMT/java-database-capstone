@@ -1,94 +1,301 @@
-/*this is the style sheet for the adminDashboard. */
+/* app/src/main/resources/static/assets/css/adminDashboard.css */
+/* ================================================================
+   Admin Dashboard Styles (Thymeleaf page: templates/admin/adminDashboard.html)
+   - Global reset & base
+   - Wrapper & main layout with background
+   - Search / filters / buttons
+   - Modal (add doctor)
+   - Doctor cards grid
+   - Responsive tweaks
+================================================================= */
 
-/* 
-Global Reset (`*`)
+/* ============ Global Reset & Base ============ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; font-family: Arial, sans-serif; color: #222; background: #fafafa; }
 
-* Purpose: Ensure consistent layout across all browsers.
-* Properties:
+/* Utility */
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0);
+  white-space: nowrap; border: 0;
+}
 
-  * `margin: 0` — removes default outer spacing from all elements.
-  * `padding: 0` — removes default inner spacing.
-  * `box-sizing: border-box` — ensures padding and borders are included within the total width/height of elements.
+/* ============ Wrapper & Main Layout ============ */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
 
-Base HTML & Body (`html, body`)
+.main-content {
+  flex-grow: 1;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 
-* Purpose: Establish a full-height layout and apply a standard font across the page.
-* Properties:
+  /* Background image settings */
+  background-image: url("../images/backgrounds/index.png"); /* or "index.png" if placed same folder */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
 
-  * `height: 100%` — allows containers to stretch to the full viewport height.
-  * `font-family: Arial, sans-serif` — applies a clean, readable sans-serif font.
+/* Section heading */
+.main-content h2 {
+  font-size: 32px;
+  font-weight: bold;
+  margin-bottom: 50px;
+  color: #003e3e;
+}
 
-Main Layout Wrapper (`.wrapper`)
+/* ============ Controls: Search & Filters ============ */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
 
-* Purpose: Create a flexible, vertical layout that fills the entire screen.
-* Properties:
+.search-bar input[type="text"] {
+  width: min(520px, 90vw);
+  padding: 12px 14px;
+  border: 1px solid #cfd8dc;
+  border-radius: 10px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+  background: #fff;
+}
 
-  * `display: flex` — enables flexbox for layout control.
-  * `flex-direction: column` — stacks children vertically.
-  * `min-height: 100vh` — ensures the wrapper always covers full screen height.
+.search-bar input[type="text"]:focus {
+  border-color: #015c5d;
+  box-shadow: 0 0 0 3px rgba(1,92,93,.12);
+}
 
-Section Heading (`h2`)
+.filters select {
+  min-width: 200px;
+  padding: 10px 12px;
+  border: 1px solid #cfd8dc;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 15px;
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
 
-* Purpose: Style the headings prominently for section separation.
-* Properties:
+.filters select:focus {
+  border-color: #015c5d;
+  box-shadow: 0 0 0 3px rgba(1,92,93,.12);
+}
 
-  * `font-size: 32px` — makes the heading large and noticeable.
-  * `font-weight: bold` — emphasizes text.
-  * `margin-bottom: 50px` — creates space below the heading.
-  * `color: #003e3e` — uses a strong teal for visual anchoring.
+/* ============ Buttons ============ */
+button, .button {
+  background-color: #A62B1F; /* primary action */
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  margin-top: 20px;
+  width: 200px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: transform .08s ease, opacity .2s ease;
+}
 
-Main Content Section (`.main-content`)
+button:hover, .button:hover { opacity: .95; }
+button:active, .button:active { transform: translateY(1px); }
 
-* Purpose: Layout the main content with padding and a background image.
-* Properties:
+/* Admin-specific compact button (e.g., header Add Doctor) */
+.adminBtn {
+  background-color: #f4f4f4;
+  color: #333;
+  font-weight: bold;
+  width: 110px;
+  padding: 10px 0;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: color .2s ease, background-color .2s ease, transform .08s ease;
+}
 
-  * `flex-grow: 1` — lets the content fill the available vertical space.
-  * `padding: 40px` — adds internal spacing around content.
-  * `display: flex` and `flex-direction: column` — organizes content in a vertical stack.
-  * `text-align: center` — centers the text.
-  * `background-image: url("index.png")` — sets a full-screen dashboard background.
-  * `background-size: cover` — ensures the image covers the whole section.
-  * `background-position: center` — centers the image.
-  * `background-repeat: no-repeat` — avoids tiling the image.
-  * `background-attachment: fixed` — fixes the image while scrolling.
+.adminBtn:hover { color: #A62B1F; }
+.adminBtn:active { transform: translateY(1px); }
 
-Primary Button (`button`)
+/* Optional: a visually prominent Add button variant */
+.btn-add-doctor {
+  background-color: #015c5d;
+  width: auto;
+  padding: 10px 18px;
+  border-radius: 10px;
+}
+.btn-add-doctor:hover { opacity: .95; }
 
-* Purpose: Design prominent, interactive buttons for main actions.
+/* ============ Content Area & Doctor Cards ============ */
+.content {
+  width: min(1200px, 95vw);
+  margin: 0 auto 48px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(260px, 1fr));
+  gap: 18px;
+}
 
-* Properties:
+/* Card */
+.doctor-card {
+  background: #ffffffcc;
+  backdrop-filter: blur(2px);
+  border: 1px solid #e0e0e0;
+  border-radius: 14px;
+  padding: 16px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.06);
+  transition: transform .15s ease, box-shadow .2s ease;
+}
 
-  * `background-color: #A62B1F` — sets a bold red color.
-  * `color: white` — makes text stand out.
-  * `border: none` — removes any outline/border.
-  * `border-radius: 12px` — creates rounded corners.
-  * `padding: 10px 20px` — gives space inside the button.
-  * `margin-top: 20px` — adds spacing above the button.
-  * `width: 200px` — ensures consistent button width.
-  * `cursor: pointer` — shows a hand icon on hover.
-  * `font-size: 16px` — makes the text readable.
+.doctor-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0,0,0,.08);
+}
 
-* On Hover:
+.doctor-card .card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 
-  * Retains the same red background to maintain branding.
+.doctor-card .avatar {
+  width: 56px; height: 56px; border-radius: 50%;
+  object-fit: cover; background: #eceff1;
+  border: 1px solid #e0e0e0;
+}
 
-Admin Button (`.adminBtn`)
+.doctor-card .name {
+  font-size: 18px; font-weight: 700; color: #003e3e;
+}
 
-* Purpose: Provide a secondary button style for admin-specific actions.
+.doctor-card .specialty {
+  font-size: 14px; color: #455a64; margin-top: -2px;
+}
 
-* Properties:
+.doctor-card .meta {
+  display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; color: #546e7a;
+}
 
-  * `background-color: #f4f4f4` — uses a light grey background.
-  * `color: #333` — uses dark text for contrast.
-  * `font-weight: bold` — emphasizes text.
-  * `width: 110px` — smaller, compact width.
-  * `padding: 10px 0` — vertical padding only.
-  * `border: none` — clean look.
-  * `cursor: pointer` — indicates it's clickable.
+.doctor-card .actions {
+  margin-top: 10px;
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
 
-* On Hover**:
+.doctor-card .btn-secondary {
+  background: #f4f4f4; color: #333;
+  border-radius: 10px; padding: 8px 12px;
+  font-size: 14px; border: 1px solid #e0e0e0;
+}
 
-   Changes text color to `#A62B1F` for brand consistency while keeping the background same.
+.doctor-card .btn-danger {
+  background: #b71c1c; color: #fff;
+  border-radius: 10px; padding: 8px 12px; font-size: 14px; border: none;
+}
 
+/* ============ Modal (Add Doctor) ============ */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: none;                   /* hidden by default */
+  place-items: center;
+  background: rgba(0,0,0,.6);
+  z-index: 1000;
+  transition: opacity .2s ease;
+}
 
-*/
+.modal.show { display: grid; }
+
+.close {
+  position: absolute;
+  top: 16px; right: 16px;
+  font-size: 28px;
+  color: #A62B1F;
+  cursor: pointer;
+  user-select: none;
+  line-height: 1;
+}
+
+.modal-body {
+  position: relative;
+  width: min(560px, 92vw);
+  background: #fff;
+  border-radius: 14px;
+  padding: 22px 20px;
+  box-shadow: 0 10px 28px rgba(0,0,0,.18);
+  animation: modalIn .2s ease;
+}
+
+/* Form elements inside modal */
+.modal-body form .field {
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.modal-body label {
+  display: block;
+  font-size: 14px;
+  color: #37474f;
+  margin-bottom: 6px;
+}
+
+.modal-body input,
+.modal-body select,
+.modal-body textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #cfd8dc;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+  background: #fff;
+}
+
+.modal-body input:focus,
+.modal-body select:focus,
+.modal-body textarea:focus {
+  border-color: #015c5d;
+  box-shadow: 0 0 0 3px rgba(1,92,93,.12);
+}
+
+/* Modal animation */
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============ Responsive ============ */
+@media (max-width: 1024px) {
+  .content {
+    grid-template-columns: repeat(2, minmax(240px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .main-content { padding: 24px; }
+  .main-content h2 { font-size: 26px; margin-bottom: 28px; }
+
+  .controls { gap: 10px; }
+  .filters select { min-width: 150px; }
+
+  .content {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  button, .button { width: 180px; }
+}

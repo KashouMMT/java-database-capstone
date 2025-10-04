@@ -1,80 +1,173 @@
-/* This is the style sheet for the patientDashboard.html */
-  .card-actions {
-    background-color: #244557;
-    padding: 10px;
-    text-align: center;
-  }
+/* app/src/main/resources/static/assets/css/patientDashboard.css */
+/* ================================================================
+   Patient Dashboard Styles (cards actions, ripple, bottom modal)
+   - Card action bar (Book Now area)
+   - Click ripple feedback
+   - Bottom slide-in booking modal
+   - Modal form fields
+   - Confirm button
+   - Responsive + accessibility niceties
+================================================================= */
 
-  .card-actions:hover{
-    background-color: #1c3745;
-  }
+/* ---------------------------
+   Card Actions (Book Now row)
+---------------------------- */
+.card-actions {
+  background-color: #244557;   /* dark theme bar */
+  padding: 10px;
+  text-align: center;
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-actions:hover {
+  background-color: #1c3745;   /* slightly darker on hover */
+}
+
+/* optional: consistent button look inside action bar */
+.card-actions .action-btn {
+  background: #0f2c3a;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: filter .2s ease, transform .06s ease, opacity .2s ease;
+}
+
+.card-actions .action-btn:hover { filter: brightness(1.1); }
+.card-actions .action-btn:active { transform: translateY(1px); }
+
+/* ---------------------------
+   Ripple Overlay (click FX)
+---------------------------- */
+.ripple-overlay {
+  position: fixed;                  /* appear anywhere on screen */
+  left: 0; top: 0;
+  width: 20px;
+  height: 20px;
+  background-color: #1c3745;
+  border-radius: 50%;
+  z-index: 9999;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0.2;
+  pointer-events: none;             /* don't block clicks */
+  transition: transform 1s ease-out, opacity 1s ease;
+}
+
+.ripple-overlay.active {
+  transform: translate(-50%, -50%) scale(150); /* expand from click */
+  opacity: 0;
+}
+
+/* Respect users with motion sensitivity */
+@media (prefers-reduced-motion: reduce) {
   .ripple-overlay {
-    position: fixed;
-    width: 20px;
-    height: 20px;
-    background-color: #1c3745;
-    border-radius: 50%;
-    z-index: 9999;
-    transform: translate(-50%, -50%) scale(0);
-    transition: transform 1s ease-out, opacity 1s ease;
+    transition: opacity .3s ease;
+    transform: none !important;
   }
-  
   .ripple-overlay.active {
-    transform: translate(-50%, -50%) scale(150);
-    opacity: 1;
+    opacity: 0;
   }
-  
-  .modalApp {
-    position: fixed;
-  bottom: -100%;
+}
+
+/* ---------------------------------------
+   Bottom Pop-Up Modal (.modalApp)
+---------------------------------------- */
+.modalApp {
+  position: fixed;
+  bottom: -100%;                    /* hidden off-screen */
   left: 50%;
   transform: translateX(-50%);
   width: 50%;
+  max-width: 720px;
   background: #fff;
   padding: 20px;
   z-index: 10000;
-  transition: bottom 1.5s ease-in;
+  transition: bottom 0.45s ease-in; /* smooth slide-in/out */
   box-shadow: 0 -5px 10px rgba(0, 0, 0, 0.3);
-  border-radius: 10px 10px 0 0;
+  border-radius: 14px 14px 0 0;     /* rounded top corners */
   text-align: center;
-  }
-  
-  .modalApp.active {
-    bottom: 0;
-  }
-  
-  .modalApp h2 {
-    margin-top: 20px;
-  }
-  
-  .modalApp input {
-    display: block;
-    margin: 10px auto;
-    padding: 10px;
-    width: 90%;
-    margin-bottom: 40px;
-  }
+}
 
-  .modalApp select {
-    display: block;
-    margin: 10px auto;
-    padding: 10px;
-    width: 90%;
-    margin-bottom: 40px;
-  }
-  
-  .confirm-booking {
-    padding: 10px 20px;
-    background: #1c3745;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    
-  
-    
-  }
-  .confirm-booking:hover {
-    filter: brightness(1.2);
-    background-color: #1c3745;
-  }
-  
+.modalApp.active { bottom: 0; }
+
+.modalApp h2 {
+  margin-top: 10px;
+  margin-bottom: 12px;
+  color: #1c3745;
+}
+
+/* ---------------------------------------
+   Modal Form Fields
+---------------------------------------- */
+.modalApp input,
+.modalApp select,
+.modalApp textarea {
+  display: block;
+  margin: 12px auto 20px auto;
+  padding: 10px 12px;
+  width: 90%;                       /* uniform width */
+  max-width: 560px;
+  border: 1px solid #cfd8dc;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.modalApp input:focus,
+.modalApp select:focus,
+.modalApp textarea:focus {
+  border-color: #015c5d;
+  box-shadow: 0 0 0 3px rgba(1,92,93,.12);
+}
+
+/* ---------------------------------------
+   Booking Confirmation Button
+---------------------------------------- */
+.confirm-booking {
+  padding: 10px 20px;
+  background: #1c3745;             /* dark theme */
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: filter .2s ease, transform .06s ease, opacity .2s ease;
+}
+
+.confirm-booking:hover {
+  filter: brightness(1.2);          /* subtle feedback */
+}
+
+.confirm-booking:active {
+  transform: translateY(1px);
+}
+
+/* ---------------------------------------
+   Helper: Empty state / no records
+---------------------------------------- */
+.noPatientRecord {
+  font-style: italic;
+  color: #66757f;
+  font-size: 16px;
+  padding: 18px;
+  text-align: center;
+}
+
+/* ---------------------------------------
+   Responsive
+---------------------------------------- */
+@media (max-width: 900px) {
+  .modalApp { width: 70%; }
+}
+
+@media (max-width: 640px) {
+  .card-actions { flex-wrap: wrap; }
+  .modalApp { width: 92%; padding: 16px; }
+  .confirm-booking { width: 90%; }
+}

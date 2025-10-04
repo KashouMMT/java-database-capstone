@@ -1,65 +1,271 @@
-/* This is the style sheet for the doctorDashboard.html */
-/* 
-**Table Header (`.table-header`)**
+/* app/src/main/resources/static/assets/css/doctorDashboard.css */
+/* ================================================================
+   Doctor Dashboard Styles (templates/doctor/doctorDashboard.html)
+   - Reset & base
+   - Wrapper & main layout
+   - Search / filters
+   - Table styles
+   - Buttons & interactions
+   - Empty states
+   - Responsive
+================================================================= */
 
-* Set font size to `24px` for clear emphasis.
-* Use a dark teal color (`#015c5d`) for consistency with the theme.
-* Add `30px` bottom margin and remove right margin.
+/* =========================
+   RESET & BASE
+========================= */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; font-family: Arial, sans-serif; color: #222; background: #fafafa; }
 
-**Table Styling (`table`)**
+/* For accessible, screen-reader-only labels */
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0);
+  white-space: nowrap; border: 0;
+}
 
-* Make the table full width (`100%`).
-* Collapse borders for clean lines.
-* Use a `sans-serif` font.
-* Add `20px` top margin for spacing.
+/* =========================
+   LAYOUT
+========================= */
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
 
-**Table Head (`thead`)**
+.main-content {
+  flex-grow: 1;
+  padding: 40px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px; /* space between heading, controls, table */
+  text-align: center;
+  background-image: url("../images/backgrounds/doc-dashboard-bg.jpg"); /* optional background */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
 
-* Set a very light dark background (`#33333310`) for header row.
-* Use white text color (`#fff`).
+.main-content h2 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #003e3e;
+  margin-bottom: 10px;
+}
 
-**Table Cells (`td, th`)**
+/* =========================
+   SEARCH & FILTERS
+========================= */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
 
-* Apply padding of `12px 16px` for spacing.
-* Center-align the text.
-* Add a subtle bottom border (`1px solid #ddd`).
+.searchBar,
+.search-bar input[type="text"] {
+  width: min(520px, 92vw);
+  padding: 12px 14px;
+  border: 1px solid #cfd8dc;
+  border-radius: 10px;
+  font-size: 16px;
+  outline: none;
+  background: #fff;
+  transition: border-color .2s ease, box-shadow .2s ease;
+}
 
-**Table Row Styling**
+.searchBar:focus,
+.search-bar input[type="text"]:focus {
+  border-color: #015c5d;
+  box-shadow: 0 0 0 3px rgba(1,92,93,.12);
+}
 
-* Alternate row colors for better readability:
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+}
 
-  * Even rows: semi-transparent light grey (`#f9f9f959`).
-  * Odd rows: soft white background (`#ffffffc0`).
-* On hover: highlight row with a light teal overlay (`#015c5d39`).
+#todayButton,
+.button.btn-today,
+.today-btn {
+  background-color: #015c5d;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color .2s ease, transform .08s ease;
+  margin-right: 0; /* overridden by utility below if needed */
+}
 
-**Prescription Button (`.prescription-btn`)**
+.today-btn { margin-right: 10px; } /* as requested */
 
-* Set size to `30px x 30px`.
-* Make it interactive with a pointer cursor.
-* Add transition effects for scale and brightness on hover.
-* On hover:
+#todayButton:hover,
+.button.btn-today:hover,
+.today-btn:hover {
+  background-color: #017d7e; /* hover shift */
+}
 
-  * Slightly enlarge (`scale(1.1)`)
-  * Brighten appearance
-* On click: slightly shrink (`scale(0.95)`).
+#todayButton:active,
+.button.btn-today:active,
+.today-btn:active {
+  transform: translateY(1px);
+}
 
-**No Record Message (`.noPatientRecord`)**
+#datePicker,
+.date-picker {
+  padding: 10px 12px;
+  height: 42px;                /* ~30px + padding for touch targets */
+  border: 1px solid #cfd8dc;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 15px;
+  outline: none;
+  transition: border-color .2s ease, box-shadow .2s ease;
+  margin-left: 0;
+  margin-top: 0;
+}
 
-* Use a `16px` italic grey font to indicate no data gently.
+.date-picker { margin-left: 10px; margin-top: 13px; } /* per spec */
 
-**Today Button (`.today-btn`)**
+#datePicker:focus,
+.date-picker:focus {
+  border-color: #015c5d;
+  box-shadow: 0 0 0 3px rgba(1,92,93,.12);
+}
 
-* Add right margin (`10px`).
-* Add padding (`10px`).
-* Set background color to teal green (`#015c5d`).
+/* =========================
+   TABLE
+========================= */
+.table-header {
+  font-size: 24px;
+  color: #015c5d;
+  margin: 0 0 30px 0;
+}
 
-**Date Picker (`.date-picker`)**
+.table-wrapper {
+  width: min(1200px, 95vw);
+  margin: 0 auto 32px;
+  background: #ffffffcc;
+  backdrop-filter: blur(2px);
+  border: 1px solid #e0e0e0;
+  border-radius: 14px;
+  overflow: hidden; /* round table corners */
+  box-shadow: 0 6px 20px rgba(0,0,0,.06);
+}
 
-* Add left margin (`10px`) and top margin (`13px`).
-* Round corners with `8px` radius.
-* Add padding (`10px`) and set fixed height (`30px`).
+.patient-table,
+#patientTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+  margin-top: 20px; /* requested spacing above table */
+}
 
----
+.patient-table thead,
+#patientTable thead {
+  background: rgba(51, 51, 51, 0.65); /* dark semi-transparent */
+  color: #fff;
+}
 
-Let me know if you'd like a consolidated style guide for the entire HospitalCRM frontend.
- */
+.patient-table th,
+.patient-table td,
+#patientTable th,
+#patientTable td {
+  padding: 12px 16px;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+  vertical-align: middle;
+}
+
+.patient-table tbody tr:nth-child(odd),
+#patientTable tbody tr:nth-child(odd) {
+  background: #ffffffc0; /* soft white */
+}
+
+.patient-table tbody tr:nth-child(even),
+#patientTable tbody tr:nth-child(even) {
+  background: #f9f9f959; /* semi-transparent light grey */
+}
+
+.patient-table tbody tr:hover,
+#patientTable tbody tr:hover {
+  background: #015c5d39; /* light teal overlay on hover */
+}
+
+/* =========================
+   PRESCRIPTION BUTTON
+========================= */
+.prescription-btn {
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  min-height: 30px;
+  display: inline-grid;
+  place-items: center;
+  border: none;
+  border-radius: 8px;
+  background: #015c5d;
+  color: #fff;
+  cursor: pointer;
+  transition: transform .12s ease, filter .2s ease, opacity .2s ease;
+}
+
+.prescription-btn:hover {
+  transform: scale(1.1);
+  filter: brightness(1.05);
+}
+
+.prescription-btn:active {
+  transform: scale(0.95);
+}
+
+/* =========================
+   EMPTY STATE
+========================= */
+.noPatientRecord {
+  font-style: italic;
+  color: #66757f;
+  font-size: 16px;
+  padding: 18px;
+  text-align: center;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 1024px) {
+  .main-content { padding: 32px 18px; }
+  .table-wrapper { width: min(1000px, 96vw); }
+}
+
+@media (max-width: 768px) {
+  .main-content h2 { font-size: 26px; }
+  .controls { gap: 10px; }
+  .searchBar { width: 94vw; }
+  .table-wrapper { width: 96vw; border-radius: 10px; }
+  .patient-table th, .patient-table td,
+  #patientTable th, #patientTable td { padding: 10px 12px; font-size: 14px; }
+}
+
+@media (max-width: 520px) {
+  .main-content { padding: 24px 14px; gap: 16px; }
+  #todayButton, .button.btn-today, .today-btn { width: 100%; }
+  #datePicker, .date-picker { width: 100%; }
+  .patient-table th:nth-child(3),
+  .patient-table td:nth-child(3),
+  #patientTable th:nth-child(3),
+  #patientTable td:nth-child(3) {
+    display: none; /* hide Phone on very small screens for readability */
+  }
+}
